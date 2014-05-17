@@ -25,7 +25,7 @@
         var idle = undefined;
         for (var i=instance._numVoices; i--;) {
             var voice = instance._voices[i];
-            if (voice.channel == channel && voice.note == note && !voice.adsrEnvelope.isIdle())
+            if (voice.channel == channel && voice.note == note)
                 return voice;
             if (idle === undefined && voice.adsrEnvelope.isIdle())
                 idle = voice;
@@ -139,6 +139,9 @@
             voice.hsv8 = this._midiColorMapper.map(channel & 0xF, note & 0x7F, velocity & 0x7F);
             voice.adsrEnvelope.noteOn(p.attackTime, p.decayTime, p.sustainLevel, p.releaseTime);
             voice.age = 0;
+            this._voices.sort(function (a, b) { // Sort voices by age
+                return a.age - b.age;
+            });
         }
     }
 
@@ -171,12 +174,11 @@
         for (var i=this._numVoices; i--;) {
             var voice = this._voices[i];
             if (!voice.adsrEnvelope.isIdle()) {
-                var p = this._parameters[voice.channel];
                 voice.adsrEnvelope.tick(time);
                 voice.age++;
                 var brightness = Math.round(voice.hsv8[2] * voice.adsrEnvelope.getOutput());
-                if (brightness < p.baseBrightness)
-                    brightness = p.baseBrightness;
+                if (brightness < this._parameters[voice.channel].baseBrightness)
+                    brightness = this._parameters[voice.channel].baseBrightness;
                 this._leds[voice.note - this._noteMin] =
                     (voice.hsv8[0] << 16) + (voice.hsv8[1] << 8) + brightness;
                 this._activeVoices++;
