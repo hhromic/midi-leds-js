@@ -17,6 +17,7 @@
         sustainLevel: 0.0, // 0..1 (float)
         releaseTime: 400, // in milliseconds
         baseBrightness: 0x00, // 0x00..0xFF
+        enabled: true,
     };
 
     // Get a voice to use for new note
@@ -124,6 +125,16 @@
         return this._parameters[channel & 0xF].baseBrightness;
     }
 
+    // Set enable state
+    proto.setEnabled = function (channel, state) {
+        this._parameters[channel & 0xF].enabled = state;
+    }
+
+    // Get enable state
+    proto.isEnabled = function (channel) {
+        return this._parameters[channel & 0xF].enabled;
+    }
+
     // Get number of current active voices
     proto.getActiveVoices = function () {
         return this._activeVoices;
@@ -131,8 +142,8 @@
 
     // Process a Note-On event
     proto.noteOn = function (channel, note, velocity) {
-        if (note >= this._noteMin && note <= this._noteMax) {
-            var p = this._parameters[channel & 0xF];
+        var p = this._parameters[channel & 0xF];
+        if (p.enabled && note >= this._noteMin && note <= this._noteMax) {
             var voice = _getVoice(this, channel & 0xF, note & 0x7F);
             voice.channel = channel & 0xF;
             voice.note = note & 0x7F;
@@ -147,7 +158,7 @@
 
     // Process a Note-Off event
     proto.noteOff = function (channel, note) {
-        if (note >= this._noteMin && note <= this._noteMax) {
+        if (this._parameters[channel & 0xF].enabled && note >= this._noteMin && note <= this._noteMax) {
             var voice = _findVoice(this, channel & 0xF, note & 0x7F);
             if (voice !== undefined)
                 voice.adsrEnvelope.noteOff();
