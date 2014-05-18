@@ -10,7 +10,7 @@
 (function () {
     'use strict';
 
-    // Default parameters
+    // Default parameters per MIDI channel
     var _defaults = {
         attackTime: 80, // in milliseconds
         decayTime: 3000, // in milliseconds
@@ -20,7 +20,7 @@
         enabled: true,
     };
 
-    // Get a voice to use for new note
+    // Get a voice to use for a new MIDI note message
     function _getVoice (instance, channel, note) {
         var oldest = undefined;
         var idle = undefined;
@@ -36,7 +36,7 @@
         return idle !== undefined ? idle : oldest;
     }
 
-    // Find a running voice corresponding to the given channel and note, undefined if not found
+    // Find a running voice corresponding to a MIDI note message, undefined if not found
     function _findVoice (instance, channel, note) {
         for (var i=instance._numVoices; i--;) {
             var voice = instance._voices[i];
@@ -75,64 +75,64 @@
     // Prototype shortcut
     var proto = MidiLeds.prototype;
 
-    // Set attack time of a given channel
-    proto.setAttackTime = function (channel, attackTime) {
-        this._parameters[channel & 0xF].attackTime = attackTime;
-    }
-
-    // Get attack time of a given channel
+    // Get attack time for a MIDI channel
     proto.getAttackTime = function (channel) {
         return this._parameters[channel & 0xF].attackTime;
     }
 
-    // Set decay time of a given channel
-    proto.setDecayTime = function (channel, decayTime) {
-        this._parameters[channel & 0xF].decayTime = decayTime;
+    // Set attack time for a MIDI channel
+    proto.setAttackTime = function (channel, attackTime) {
+        this._parameters[channel & 0xF].attackTime = attackTime;
     }
 
-    // Get decay time of a given channel
+    // Get decay time for a MIDI channel
     proto.getDecayTime = function (channel) {
         return this._parameters[channel & 0xF].decayTime;
     }
 
-    // Set sustain level of a given channel
-    proto.setSustainLevel = function (channel, sustainLevel) {
-        this._parameters[channel & 0xF].sustainLevel = sustainLevel;
+    // Set decay time for a MIDI channel
+    proto.setDecayTime = function (channel, decayTime) {
+        this._parameters[channel & 0xF].decayTime = decayTime;
     }
 
-    // Get sustain level of a given channel
+    // Get sustain level for a MIDI channel
     proto.getSustainLevel = function (channel) {
         return this._parameters[channel & 0xF].sustainLevel;
     }
 
-    // Set release time of a given channel
-    proto.setReleaseTime = function (channel, releaseTime) {
-        this._parameters[channel & 0xF].releaseTime = releaseTime;
+    // Set sustain level for a MIDI channel
+    proto.setSustainLevel = function (channel, sustainLevel) {
+        this._parameters[channel & 0xF].sustainLevel = sustainLevel;
     }
 
-    // Get release time of a given channel
+    // Get release time for a MIDI channel
     proto.getReleaseTime = function (channel) {
         return this._parameters[channel & 0xF].releaseTime;
     }
 
-    // Set base brightness
-    proto.setBaseBrightness = function (channel, baseBrightness) {
-        this._parameters[channel & 0xF].baseBrightness = baseBrightness;
+    // Set release time for a MIDI channel
+    proto.setReleaseTime = function (channel, releaseTime) {
+        this._parameters[channel & 0xF].releaseTime = releaseTime;
     }
 
-    // Get base brightness
+    // Get base brightness for a MIDI channel
     proto.getBaseBrightness = function (channel) {
         return this._parameters[channel & 0xF].baseBrightness;
     }
 
-    // Set enable state
-    proto.setEnabled = function (channel, state) {
-        this._parameters[channel & 0xF].enabled = state;
+    // Set base brightness for a MIDI channel
+    proto.setBaseBrightness = function (channel, baseBrightness) {
+        this._parameters[channel & 0xF].baseBrightness = baseBrightness;
     }
 
-    // Get enable state
+    // Get enable state for a MIDI channel
     proto.isEnabled = function (channel) {
         return this._parameters[channel & 0xF].enabled;
+    }
+
+    // Set enable state for a MIDI channel
+    proto.setEnabled = function (channel, state) {
+        this._parameters[channel & 0xF].enabled = state;
     }
 
     // Get number of current active voices
@@ -140,7 +140,7 @@
         return this._activeVoices;
     }
 
-    // Process a Note-On event
+    // Process a MIDI Note-On message
     proto.noteOn = function (channel, note, velocity) {
         var p = this._parameters[channel & 0xF];
         if (p.enabled && note >= this._noteMin && note <= this._noteMax) {
@@ -156,7 +156,7 @@
         }
     }
 
-    // Process a Note-Off event
+    // Process a MIDI Note-Off message
     proto.noteOff = function (channel, note) {
         if (this._parameters[channel & 0xF].enabled && note >= this._noteMin && note <= this._noteMax) {
             var voice = _findVoice(this, channel & 0xF, note & 0x7F);
@@ -165,7 +165,7 @@
         }
     }
 
-    // Turn all Leds off
+    // Turn all LEDs off for a MIDI channel
     proto.allLedsOff = function (channel) {
         for (var i=this._numVoices; i--;) {
             var voice = this._voices[i];
@@ -174,7 +174,7 @@
         };
     }
 
-    // Reset parameters values to defaults
+    // Reset parameters values to defaults for a MIDI channel
     proto.reset = function (channel) {
         this._parameters[channel & 0xF] = Object.create(_defaults);
     }
