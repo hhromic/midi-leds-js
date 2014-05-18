@@ -44,7 +44,7 @@
 
     // Set the minimum note value for a MIDI channel
     proto.setNoteMin = function (channel, noteMin) {
-        this._parameters[channel & 0xF].noteMin = noteMin;
+        this._parameters[channel & 0xF].noteMin = noteMin & 0x7F;
     }
 
     // Get the maximum note value for a MIDI channel
@@ -54,7 +54,7 @@
 
     // Set the maximum note value for a MIDI channel
     proto.setNoteMax = function (channel, noteMax) {
-        this._parameters[channel & 0xF].noteMax = noteMax;
+        this._parameters[channel & 0xF].noteMax = noteMax & 0x7F;
     }
 
     // Get the active color mapper for a MIDI channel
@@ -84,7 +84,7 @@
 
     // Set the active fixed color hue to use for a MIDI channel
     proto.setFixedHue = function (channel, fixedHue) {
-        this._parameters[channel & 0xF].fixedHue = fixedHue;
+        this._parameters[channel & 0xF].fixedHue = fixedHue & 0xFF;
     }
 
     // Get the active velocity ignoring state for a MIDI channel
@@ -100,14 +100,16 @@
     // Map a MIDI note message to an HSV color
     proto.map = function (channel, note, velocity) {
         var p = this._parameters[channel & 0xF];
-        var _velocity = p.ignoreVelocity ? 0x7F : velocity;
+        if (note < p.noteMin || note > p.noteMax)
+            return undefined;
+        var _velocity = p.ignoreVelocity ? 0x7F : velocity & 0x7F;
         switch (p.mapper) {
             case Mappers.COLOR_MAP: // Use Midi Note Color maps
-                var noteColor = MidiNoteColors.get(p.noteColorMap, note);
+                var noteColor = MidiNoteColors.get(p.noteColorMap, note & 0x7F);
                 return [noteColor[0], noteColor[1], Math.round((_velocity / 0x7F) * noteColor[2])];
             case Mappers.RAINBOW: // Generate rainbow-like colors
                 return [
-                    Math.round((note - p.noteMin) * (0xFF / (p.noteMax - p.noteMin + 1))),
+                    Math.round(((note & 0x7F) - p.noteMin) * (0xFF / (p.noteMax - p.noteMin + 1))),
                     0xFF, Math.round((_velocity / 0x7F) * 0xFF)
                 ];
                 break;
