@@ -20,32 +20,6 @@
         enabled: true,
     };
 
-    // Get a voice to use for a new MIDI note message
-    function _getVoice (instance, channel, note) {
-        var oldest = undefined;
-        var idle = undefined;
-        for (var i=instance._numVoices; i--;) {
-            var voice = instance._voices[i];
-            if (voice.channel == channel && voice.note == note)
-                return voice;
-            if (idle === undefined && voice.adsrEnvelope.isIdle())
-                idle = voice;
-            if (oldest === undefined || voice.age > oldest.age)
-                oldest = voice;
-        }
-        return idle !== undefined ? idle : oldest;
-    }
-
-    // Find a running voice corresponding to a MIDI note message, undefined if not found
-    function _findVoice (instance, channel, note) {
-        for (var i=instance._numVoices; i--;) {
-            var voice = instance._voices[i];
-            if (voice.channel == channel && voice.note == note && !voice.adsrEnvelope.isIdle())
-                return voice;
-        }
-        return undefined;
-    }
-
     // Constructor (provide Uint32Array leds for better performance)
     function MidiLeds (leds, noteMin, noteMax, numVoices, midiColorMapper) {
         this._leds = leds;
@@ -74,6 +48,40 @@
 
     // Prototype shortcut
     var proto = MidiLeds.prototype;
+
+    // Get a voice index to use for a new MIDI note message
+    proto._getVoiceIndex = function (channel, note) {
+        var oldestIndex = undefined;
+        var idleIndex = undefined;
+        for (var i=this._numVoices; i--;) {
+            var voice = this._voices[i];
+            if (voice.channel == channel && voice.note == note)
+                return i;
+            if (idleIndex === undefined && voice.adsrEnvelope.isIdle())
+                idleIndex = i;
+            if (oldestIndex === undefined || voice.age > this._voices[oldestIndex].age)
+                oldestIndex = i;
+        }
+        return idleIndex !== undefined ? idleIndex : oldestIndex;
+    }
+
+    // Move voice with given index to the front of the voices array
+    proto._moveVoice = function (index) {
+        var movedVoice = this._voices[index];
+        for (var i=index; i--;)
+            this._voices[i + 1] = this._voices[i];
+        this._voices[0] = movedVoice;
+    }
+
+    // Find the voice index corresponding to a MIDI note message, undefined if not found
+    proto._findVoiceIndex = function (channel, note) {
+        for (var i=this._numVoices; i--;) {
+            var voice = this._voices[i];
+            if (voice.channel == channel && voice.note == note && !voice.adsrEnvelope.isIdle())
+                return i;
+        }
+        return undefined;
+    }
 
     // Get attack time for a MIDI channel
     proto.getAttackTime = function (channel) {
@@ -144,24 +152,23 @@
     proto.noteOn = function (channel, note, velocity) {
         var p = this._parameters[channel & 0xF];
         if (p.enabled && note >= this._noteMin && note <= this._noteMax) {
-            var voice = _getVoice(this, channel & 0xF, note & 0x7F);
+            var voiceIndex = this._getVoiceIndex(channel & 0xF, note & 0x7F);
+            var voice = this._voices[voiceIndex];
             voice.channel = channel & 0xF;
             voice.note = note & 0x7F;
             voice.hsv8 = this._midiColorMapper.map(channel & 0xF, note & 0x7F, velocity & 0x7F);
             voice.adsrEnvelope.noteOn(p.attackTime, p.decayTime, p.sustainLevel, p.releaseTime);
             voice.age = 0;
-            this._voices.sort(function (a, b) { // Sort voices by age
-                return a.age - b.age;
-            });
+            this._moveVoice(voiceIndex);
         }
     }
 
     // Process a MIDI Note-Off message
     proto.noteOff = function (channel, note) {
         if (this._parameters[channel & 0xF].enabled && note >= this._noteMin && note <= this._noteMax) {
-            var voice = _findVoice(this, channel & 0xF, note & 0x7F);
-            if (voice !== undefined)
-                voice.adsrEnvelope.noteOff();
+            var voiceIndex = this._findVoiceIndex(channel & 0xF, note & 0x7F);
+            if (voiceIndex !== undefined)
+                this._voices[voiceIndex].adsrEnvelope.noteOff();
         }
     }
 
