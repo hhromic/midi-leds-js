@@ -54,12 +54,11 @@
         var oldestIndex = undefined;
         var idleIndex = undefined;
         for (var i=this._numVoices; i--;) {
-            var voice = this._voices[i];
-            if (voice.channel == channel && voice.note == note)
+            if (this._voices[i].channel == channel && this._voices[i].note == note)
                 return i;
-            if (idleIndex === undefined && voice.adsrEnvelope.isIdle())
+            if (idleIndex === undefined || this._voices[i].adsrEnvelope.isIdle())
                 idleIndex = i;
-            if (oldestIndex === undefined || voice.age > this._voices[oldestIndex].age)
+            if (oldestIndex === undefined || this._voices[i].age > this._voices[oldestIndex].age)
                 oldestIndex = i;
         }
         return idleIndex !== undefined ? idleIndex : oldestIndex;
@@ -75,11 +74,9 @@
 
     // Find the voice index corresponding to a MIDI note message, undefined if not found
     proto._findVoiceIndex = function (channel, note) {
-        for (var i=this._numVoices; i--;) {
-            var voice = this._voices[i];
-            if (voice.channel == channel && voice.note == note && !voice.adsrEnvelope.isIdle())
+        for (var i=this._numVoices; i--;)
+            if (this._voices[i].channel == channel && this._voices[i].note == note && !this._voices[i].adsrEnvelope.isIdle())
                 return i;
-        }
         return undefined;
     }
 
@@ -174,11 +171,9 @@
 
     // Turn all LEDs off for a MIDI channel
     proto.allLedsOff = function (channel) {
-        for (var i=this._numVoices; i--;) {
-            var voice = this._voices[i];
-            if (voice.channel == (channel & 0xF) && !voice.adsrEnvelope.isIdle())
-                voice.adsrEnvelope.noteOff();
-        };
+        for (var i=this._numVoices; i--;)
+            if (this._voices[i].channel == (channel & 0xF) && !this._voices[i].adsrEnvelope.isIdle())
+                this._voices[i].adsrEnvelope.noteOff();
     }
 
     // Reset parameters values to defaults for a MIDI channel
