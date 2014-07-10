@@ -161,7 +161,7 @@
     }
 
     // Process a MIDI Note-Off message
-    proto.noteOff = function (channel, note) {
+    proto.noteOff = function (channel, note, velocity) {
         if (this._parameters[channel & 0xF].enabled && note >= this._noteMin && note <= this._noteMax) {
             var voiceIndex = this._findVoiceIndex(channel & 0xF, note & 0x7F);
             if (voiceIndex !== undefined)
