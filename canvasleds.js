@@ -8,8 +8,12 @@
 (function () {
     'use strict';
 
-    // Constructor (provide Uint32Array leds for better performance)
-    function CanvasLeds(canvas, leds) {
+    // Constructor (provide Uint32Array 'leds' for better performance)
+    function CanvasLeds(container, leds) {
+        var canvas = document.createElement('canvas');
+        canvas.setAttribute('width', Math.floor(container.offsetWidth / leds.length) * leds.length);
+        canvas.setAttribute('height', container.offsetHeight);
+        container.appendChild(canvas);
         this._canvas = {
             ledWidth: canvas.getAttribute('width') / leds.length,
             ledHeight: canvas.getAttribute('height') / 1,
