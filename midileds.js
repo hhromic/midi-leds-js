@@ -3,7 +3,7 @@
  * Hugo Hromic - http://github.com/hhromic
  * MIT license
  *
- * Depends: adsrenvelope.js, midicolorpalette.js
+ * Depends: adsrenvelope.js, midicolors.js
  */
 /*jslint nomen: true*/
 
@@ -21,12 +21,12 @@
     };
 
     // Constructor (provide Uint32Array 'leds' for better performance)
-    function MidiLeds (leds, noteMin, noteMax, numVoices, midiColorPalette) {
+    function MidiLeds (leds, noteMin, noteMax, numVoices, midiColors) {
         this._leds = leds;
         this._noteMin = noteMin & 0x7F;
         this._noteMax = noteMax & 0x7F;
         this._numVoices = numVoices;
-        this._midiColorPalette = midiColorPalette;
+        this._midiColors = midiColors;
 
         // Initialise voices
         this._voices = new Array(numVoices);
@@ -153,7 +153,7 @@
             var voice = this._voices[voiceIndex];
             voice.channel = channel & 0xF;
             voice.note = note & 0x7F;
-            voice.hsv8 = this._midiColorPalette.get(channel & 0xF, note & 0x7F, velocity & 0x7F);
+            voice.hsv8 = this._midiColors.get(channel & 0xF, note & 0x7F, velocity & 0x7F);
             voice.adsrEnvelope.noteOn(p.attackTime, p.decayTime, p.sustainLevel, p.releaseTime);
             voice.age = 0;
             this._moveVoice(voiceIndex);

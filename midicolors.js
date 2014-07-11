@@ -1,5 +1,5 @@
 /**
- * MidiColorPalette v1.0 - A very simple MIDI notes color palette for JavaScript.
+ * MidiColors v1.0 - A MIDI notes to color mapper for JavaScript.
  * Hugo Hromic - http://github.com/hhromic
  * MIT license
  */
@@ -8,15 +8,15 @@
 (function () {
     'use strict';
 
-    // Available palettes
+    // Available color palettes
     var Palettes = {
         COLOR_MAP: 0,
         RAINBOW: 1,
         FIXED_HUE: 2,
     };
 
-    // Available note color maps
-    var Maps = {
+    // Available color maps for the COLOR_MAP palette
+    var ColorMaps = {
         AEPPLI_1940: 0,
         BELMONT_1944: 1,
         BERTRAND_1734: 2,
@@ -32,8 +32,8 @@
         ZIEVERINK_2004: 12,
     };
 
-    // Note color maps data for (13 color maps x 12 notes)
-    var _colorData = [
+    // Color maps data for (13 color maps x 12 notes)
+    var _colorMapsData = [
         [[0, 245, 250], [10, 240, 250], [20, 238, 248], [32, 209, 248], [42, 192, 245], [69, 232, 220], [96, 220, 143], [122, 207, 145], [136, 209, 156], [150, 209, 161], [194, 227, 125], [214, 240, 125]], // aeppli1940
         [[0, 245, 250], [9, 238, 245], [20, 238, 248], [35, 235, 248], [42, 192, 245], [51, 192, 225], [96, 220, 143], [122, 207, 145], [176, 230, 130], [222, 225, 168], [231, 232, 217], [240, 235, 174]], // belmont1944
         [[176, 230, 130], [122, 207, 145], [96, 220, 143], [56, 189, 145], [42, 192, 245], [34, 192, 245], [20, 238, 248], [0, 245, 250], [0, 240, 158], [231, 232, 217], [194, 227, 125], [214, 240, 125]], // bertrand1734
@@ -54,20 +54,20 @@
         noteMin: 0x00, // 0x00..0x7F
         noteMax: 0x7F, // 0x00..0x7F
         palette: Palettes.COLOR_MAP,
-        map: Maps.NEWTON_1704,
+        colorMap: ColorMaps.NEWTON_1704,
         fixedHue: 0x00, // 0x00..0xFF
         ignoreVelocity: true,
     };
 
     // Constructor
-    function MidiColorPalette() {
+    function MidiColors() {
         this._parameters = new Array(16);
         for (var i=16; i--;)
             this.reset(i);
     }
 
     // Prototype shortcut
-    var proto = MidiColorPalette.prototype;
+    var proto = MidiColors.prototype;
 
     // Get the minimum note value for a MIDI channel
     proto.getNoteMin = function (channel) {
@@ -99,14 +99,14 @@
         this._parameters[channel & 0xF].palette = palette;
     }
 
-    // Get the active note color map for a MIDI channel
-    proto.getMap = function (channel) {
-        return this._parameters[channel & 0xF].map;
+    // Get the active color map for a MIDI channel
+    proto.getColorMap = function (channel) {
+        return this._parameters[channel & 0xF].colorMap;
     }
 
-    // Set the active note color map to use for a MIDI channel
-    proto.setMap = function (channel, map) {
-        this._parameters[channel & 0xF].map = map;
+    // Set the active color map to use for a MIDI channel
+    proto.setColorMap = function (channel, colorMap) {
+        this._parameters[channel & 0xF].colorMap = colorMap;
     }
 
     // Get the active fixed color hue for a MIDI channel
@@ -137,7 +137,7 @@
         var _velocity = p.ignoreVelocity ? 0x7F : velocity & 0x7F;
         switch (p.palette) {
             case Palettes.COLOR_MAP:
-                var noteColor = _colorData[p.map][(note & 0x7F) % 12];
+                var noteColor = _colorMapsData[p.colorMap][(note & 0x7F) % 12];
                 return [
                     noteColor[0],
                     noteColor[1],
@@ -164,22 +164,22 @@
         this._parameters[channel & 0xF] = Object.create(_defaults);
     }
 
-    // Expose palettes
-    MidiColorPalette.Palettes = Palettes;
+    // Expose color palettes
+    MidiColors.Palettes = Palettes;
 
-    // Expose color maps
-    MidiColorPalette.Maps = Maps;
+    // Expose color maps for the COLOR_MAP palette
+    MidiColors.ColorMaps = ColorMaps;
 
     // Expose either via AMD, CommonJS or the global object
     if (typeof define === 'function' && define.amd) {
         define(function () {
-            return MidiColorPalette;
+            return MidiColors;
         });
     }
     else if (typeof module === 'object' && module.exports) {
-        module.exports = MidiColorPalette;
+        module.exports = MidiColors;
     }
     else {
-        this.MidiColorPalette = MidiColorPalette;
+        this.MidiColors = MidiColors;
     }
 }.call(this));
