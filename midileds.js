@@ -20,7 +20,9 @@
         enabled: true,
     };
 
-    // Constructor (provide Uint32Array 'leds' for better performance)
+    // Constructor
+    // 'leds' is an array of arrays (MIDI channel x leds)
+    // tip: use Uint32Array for better performance
     function MidiLeds (leds, noteMin, noteMax, numVoices, midiColors) {
         this._leds = leds;
         this._noteMin = noteMin & 0x7F;
@@ -192,7 +194,7 @@
                 var brightness = Math.round(voice.hsv8[2] * voice.adsrEnvelope.getOutput());
                 if (brightness < this._parameters[voice.channel].baseBrightness)
                     brightness = this._parameters[voice.channel].baseBrightness;
-                this._leds[voice.note - this._noteMin] =
+                this._leds[voice.channel][voice.note - this._noteMin] =
                     (voice.hsv8[0] << 16) + (voice.hsv8[1] << 8) + brightness;
                 this._activeVoices++;
             }
