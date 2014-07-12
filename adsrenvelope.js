@@ -83,7 +83,7 @@
                     this._decayStart = this._target;
                     this._target = this._sustainLevel;
                 }
-                break;
+                return;
             case States.DECAY: // Decay phase
                 this._output = isFinite(this._decayRate) ?
                     this._decayStart - (relativeTime * this._decayRate) : this._target;
@@ -92,12 +92,12 @@
                     this._output = this._target;
                     this._lastTime = 0;
                 }
-                break;
+                return;
             case States.SUSTAIN: // Sustain phase
                 this._lastTime = 0;
                 if (this._output == 0.0) // Skip to idle phase?
                     this._state = States.IDLE;
-                break;
+                return;
             case States.RELEASE: // Release phase
                 this._output = isFinite(this._releaseRate) ?
                     this._releaseStart - (relativeTime * this._releaseRate) : this._target;
@@ -106,7 +106,7 @@
                     this._output = this._target;
                     this._lastTime = 0;
                 }
-                break;
+                return;
         }
     }
 
