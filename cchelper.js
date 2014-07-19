@@ -31,7 +31,10 @@
     }
 
     // Process a MIDI Control Change (CC) message
-    proto.controlChange = function (channel, control, value) {
+    proto.controlChange = function (_channel, _control, _value) {
+        var channel = _channel & 0xF;
+        var control = _control & 0x7F;
+        var value = _value & 0x7F;
         switch (control) {
             case 0x14: // Change Palette
                 this._midiColors.setPalette(channel, value);
