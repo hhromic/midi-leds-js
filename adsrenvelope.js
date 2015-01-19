@@ -1,5 +1,6 @@
 /**
- * AdsrEnvelope v1.0 - A very simple ADSR envelope implementation for JavaScript.
+ * AdsrEnvelope v1.0 - https://github.com/hhromic/midi-leds-js
+ * A very simple ADSR envelope implementation for JavaScript.
  * Hugo Hromic - http://github.com/hhromic
  * MIT license
  *
@@ -19,7 +20,12 @@
         RELEASE: 4
     };
 
-    // Constructor
+    /**
+     * Represents an ADSR envelope.
+     *
+     * @public
+     * @constructor
+     */
     function AdsrEnvelope() {
         this._state = States.IDLE;
         this._output = 0.0;
@@ -34,10 +40,18 @@
         this._releaseTime = 0;
     }
 
-    // Prototype shortcut
+    // Shortcuts to improve speed and size
     var proto = AdsrEnvelope.prototype;
 
-    // Start the ADSR envelope with given parameters
+    /**
+     * Triggers the attack phase of the ADSR envelope (Note-On).
+     *
+     * @public
+     * @param {number} attackTime - time in milliseconds for the attack phase.
+     * @param {number} decayTime - time in milliseconds for the decay phase.
+     * @param {number} sustainLevel - amplitude level [0,1] for the sustain phase.
+     * @param {number} releaseTime - time in milliseconds for the release phase.
+     */
     proto.noteOn = function (attackTime, decayTime, sustainLevel, releaseTime) {
         this._state = States.ATTACK;
         this._output = 0.0;
@@ -49,7 +63,11 @@
         this._releaseTime = releaseTime;
     }
 
-    // Trigger the release phase of the ADSR envelope
+    /**
+     * Triggers the release phase of the ADSR envelope (Note-Off).
+     *
+     * @public
+     */
     proto.noteOff = function () {
         if (this._state != States.IDLE) {
             this._state = States.RELEASE;
@@ -60,7 +78,13 @@
         }
     }
 
-    // Update the ADSR envelope phase and output value (assumes monotonically increasing time)
+    /**
+     * Updates the ADSR envelope state and output value.
+     * (this function assumes time to be monotonically increasing)
+     *
+     * @public
+     * @param {number} time - current real time in milliseconds for the update.
+     */
     proto.tick = function (time) {
         // Do nothing if the envelope is idle
         if (this._state == States.IDLE)
@@ -110,12 +134,22 @@
         }
     }
 
-    // Get the ADSR envelope output value
+    /**
+     * Gets the ADSR envelope current output value.
+     *
+     * @public
+     * @returns {number} - the current output value of the ADSR envelope [0,1].
+     */
     proto.getOutput = function () {
         return this._output;
     }
 
-    // Test if the ADSR envelope is in idle state
+    /**
+     * Tests if the ADSR envelope is in the idle state.
+     *
+     * @public
+     * @returns {boolean} - true if the ADSR envelope is idling, false otherwise.
+     */
     proto.isIdle = function () {
         return this._state == States.IDLE;
     }
