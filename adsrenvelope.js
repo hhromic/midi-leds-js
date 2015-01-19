@@ -8,7 +8,7 @@
  */
 /*jslint nomen: true*/
 
-(function () {
+;(function () {
     'use strict';
 
     // ADSR envelope states
