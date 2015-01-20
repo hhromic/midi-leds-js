@@ -1,22 +1,23 @@
 /**
- * MidiColors v1.0 - A MIDI notes to color mapper for JavaScript.
- * Hugo Hromic - http://github.com/hhromic
+ * MidiColors v1.0 - https://github.com/hhromic/midi-leds-js
+ * A MIDI notes to colors mapper for JavaScript.
  * MIT license
+ * Hugo Hromic - http://github.com/hhromic
  */
 /*jslint nomen: true*/
 
-(function () {
+;(function () {
     'use strict';
 
     // Available color palettes
-    var Palettes = {
+    var Palette = {
         COLOR_MAP: 0,
         RAINBOW: 1,
         FIXED_HUE: 2,
     };
 
     // Available color maps for the COLOR_MAP palette
-    var ColorMaps = {
+    var ColorMap = {
         AEPPLI_1940: 0,
         BELMONT_1944: 1,
         BERTRAND_1734: 2,
@@ -32,7 +33,7 @@
         ZIEVERINK_2004: 12,
     };
 
-    // Color maps data for (13 color maps x 12 notes)
+    // Color maps HSV8 data for (13 color maps x 12 notes)
     var _colorMapsData = [
         [[0, 245, 250], [10, 240, 250], [20, 238, 248], [32, 209, 248], [42, 192, 245], [69, 232, 220], [96, 220, 143], [122, 207, 145], [136, 209, 156], [150, 209, 161], [194, 227, 125], [214, 240, 125]], // aeppli1940
         [[0, 245, 250], [9, 238, 245], [20, 238, 248], [35, 235, 248], [42, 192, 245], [51, 192, 225], [96, 220, 143], [122, 207, 145], [176, 230, 130], [222, 225, 168], [231, 232, 217], [240, 235, 174]], // belmont1944
@@ -53,122 +54,212 @@
     var _defaults = {
         noteMin: 0x00, // 0x00..0x7F
         noteMax: 0x7F, // 0x00..0x7F
-        palette: Palettes.COLOR_MAP,
-        colorMap: ColorMaps.NEWTON_1704,
+        palette: Palette.COLOR_MAP,
+        colorMap: ColorMap.NEWTON_1704,
         fixedHue: 0x00, // 0x00..0xFF
         ignoreVelocity: true,
     };
 
-    // Constructor
+    /**
+     * Represents a MIDI notes to colors mapper.
+     *
+     * @public
+     * @constructor
+     */
     function MidiColors() {
         this._parameters = new Array(16);
         for (var i=16; i--;)
             this.reset(i);
     }
 
-    // Prototype shortcut
+    // Shortcuts to improve speed and size
     var proto = MidiColors.prototype;
 
-    // Get the minimum note value for a MIDI channel
+    /**
+     * Gets the minimum note value for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @returns {number} - the minimum MIDI note for the channel.
+     */
     proto.getNoteMin = function (channel) {
         return this._parameters[channel & 0xF].noteMin;
     }
 
-    // Set the minimum note value for a MIDI channel
+    /**
+     * Sets the minimum note value for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @param {number} noteMin - the minimum MIDI note value to set.
+     */
     proto.setNoteMin = function (channel, noteMin) {
         this._parameters[channel & 0xF].noteMin = noteMin & 0x7F;
     }
 
-    // Get the maximum note value for a MIDI channel
+    /**
+     * Gets the maximum note value for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @returns {number} - the maximum MIDI note for the channel.
+     */
     proto.getNoteMax = function (channel) {
         return this._parameters[channel & 0xF].noteMax;
     }
 
-    // Set the maximum note value for a MIDI channel
+    /**
+     * Sets the maximum note value for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @param {number} noteMax - the maximum MIDI note value to set.
+     */
     proto.setNoteMax = function (channel, noteMax) {
         this._parameters[channel & 0xF].noteMax = noteMax & 0x7F;
     }
 
-    // Get the active color palette for a MIDI channel
+    /**
+     * Gets the active color palette for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @returns {MidiColors.Palette} - the active color palette for the channel.
+     */
     proto.getPalette = function (channel) {
         return this._parameters[channel & 0xF].palette;
     }
 
-    // Set the active color palette to use for a MIDI channel
+    /**
+     * Sets the active color palette for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @param {MidiColors.Palette} palette - the color palette to set.
+     */
     proto.setPalette = function (channel, palette) {
         this._parameters[channel & 0xF].palette = palette;
     }
 
-    // Get the active color map for a MIDI channel
+    /**
+     * Gets the active color map for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @returns {MidiColors.ColorMap} - the active color map for the channel.
+     */
     proto.getColorMap = function (channel) {
         return this._parameters[channel & 0xF].colorMap;
     }
 
-    // Set the active color map to use for a MIDI channel
+    /**
+     * Sets the active color map to use for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @param {MidiColors.ColorMap} colorMap - the color map to set.
+     */
     proto.setColorMap = function (channel, colorMap) {
         this._parameters[channel & 0xF].colorMap = colorMap;
     }
 
-    // Get the active fixed color hue for a MIDI channel
+    /**
+     * Gets the active fixed color hue for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @returns {number} - the active fixed color hue for the channel.
+     */
     proto.getFixedHue = function (channel) {
         return this._parameters[channel & 0xF].fixedHue;
     }
 
-    // Set the active fixed color hue to use for a MIDI channel
+    /**
+     * Sets the active fixed color hue to use for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @param {number} fixedHue - the fixed color hue to set.
+     */
     proto.setFixedHue = function (channel, fixedHue) {
         this._parameters[channel & 0xF].fixedHue = fixedHue & 0xFF;
     }
 
-    // Get the active velocity ignoring state for a MIDI channel
+    /**
+     * Gets the active velocity ignoring state for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @returns {boolean} - true if velocity is ignored for the channel, false otherwise.
+     */
     proto.isIgnoreVelocity = function (channel) {
         return this._parameters[channel & 0xF].ignoreVelocity;
     }
 
-    // Set the active velocity ignoring state for a MIDI channel
+    /**
+     * Sets the active velocity ignoring state for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @param {boolean} state - true to ignore velocity for the channel, false otherwise.
+     */
     proto.setIgnoreVelocity = function (channel, state) {
         this._parameters[channel & 0xF].ignoreVelocity = state;
     }
 
-    // Get color for MIDI channel, note and velocity using active palette
+    /**
+     * Gets a color for MIDI channel, note and velocity using the active palette and parameters.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     * @param {number} note - the MIDI note.
+     * @param {number} velocity - the MIDI note velocity.
+     * @returns {Uint8Array} - a 3-elements array with the assigned color in HSV8 format.
+     */
     proto.get = function (channel, note, velocity) {
         var p = this._parameters[channel & 0xF];
         if (note < p.noteMin || note > p.noteMax)
             return undefined;
         var _velocity = p.ignoreVelocity ? 0x7F : velocity & 0x7F;
         switch (p.palette) {
-            case Palettes.COLOR_MAP:
+            case Palette.COLOR_MAP:
                 var noteColor = _colorMapsData[p.colorMap][(note & 0x7F) % 12];
-                return [
+                return new Uint8Array([
                     noteColor[0],
                     noteColor[1],
                     Math.round((_velocity / 0x7F) * noteColor[2])
-                ];
-            case Palettes.RAINBOW:
-                return [
+                ]);
+            case Palette.RAINBOW:
+                return new Uint8Array([
                     Math.round(((note & 0x7F) - p.noteMin) * (0xFF / (p.noteMax - p.noteMin + 1))),
                     0xFF,
                     Math.round((_velocity / 0x7F) * 0xFF)
-                ];
-            case Palettes.FIXED_HUE:
-                return [
+                ]);
+            case Palette.FIXED_HUE:
+                return new Uint8Array([
                     p.fixedHue,
                     0xFF,
                     Math.round((_velocity / 0x7F) * 0xFF)
-                ];
+                ]);
         }
         return undefined;
     }
 
-    // Reset parameters values to defaults for a MIDI channel
+    /**
+     * Resets parameters values to defaults for a MIDI channel.
+     *
+     * @public
+     * @param {number} channel - the MIDI channel.
+     */
     proto.reset = function (channel) {
         this._parameters[channel & 0xF] = Object.create(_defaults);
     }
 
     // Expose color palettes
-    MidiColors.Palettes = Palettes;
+    MidiColors.Palette = Palette;
 
     // Expose color maps for the COLOR_MAP palette
-    MidiColors.ColorMaps = ColorMaps;
+    MidiColors.ColorMap = ColorMap;
 
     // Expose either via AMD, CommonJS or the global object
     if (typeof define === 'function' && define.amd) {
