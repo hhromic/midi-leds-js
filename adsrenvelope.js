@@ -1,8 +1,8 @@
 /**
  * AdsrEnvelope v1.0 - https://github.com/hhromic/midi-leds-js
  * A very simple ADSR envelope implementation for JavaScript.
- * Hugo Hromic - http://github.com/hhromic
  * MIT license
+ * Hugo Hromic - http://github.com/hhromic
  *
  * Taken (& adapted) from: https://github.com/thestk/stk/blob/master/src/ADSR.cpp
  */

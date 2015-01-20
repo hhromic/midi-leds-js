@@ -1,8 +1,8 @@
 /**
  * CanvasLeds v1.0 - https://github.com/hhromic/midi-leds-js
  * A very simple LEDs display based on HTML5 canvas.
- * Hugo Hromic - http://github.com/hhromic
  * MIT license
+ * Hugo Hromic - http://github.com/hhromic
  */
 /*jslint nomen: true*/
 

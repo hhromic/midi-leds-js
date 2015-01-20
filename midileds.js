@@ -1,9 +1,10 @@
 /**
- * MidiLeds v1.0 - An ADSR-based polyphonic MIDI LEDs display for JavaScript.
- * Hugo Hromic - http://github.com/hhromic
+ * MidiLeds v1.0 - https://github.com/hhromic/midi-leds-js
+ * An ADSR-based polyphonic MIDI LEDs display for JavaScript.
  * MIT license
+ * Hugo Hromic - http://github.com/hhromic
  *
- * Depends: adsrenvelope.js, midicolors.js
+ * @license
  */
 /*jslint nomen: true*/
 

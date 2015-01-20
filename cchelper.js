@@ -1,36 +1,57 @@
 /**
- * CCHelper v1.0 - A MIDI Control Change (CC) helper for the MidiLeds and MidiColors classes.
- * Hugo Hromic - http://github.com/hhromic
+ * CCHelper v1.0 - https://github.com/hhromic/midi-leds-js
+ * A MIDI Control Change (CC) helper for the MidiLeds and MidiColors classes.
  * MIT license
- *
- * Depends: midileds.js, midicolors.js
- */
+ * Hugo Hromic - http://github.com/hhromic
 /*jslint nomen: true*/
 
-(function () {
+;(function () {
     'use strict';
 
-    // Constructor
+    /**
+     * Represents a MIDI CC helper.
+     *
+     * @public
+     * @constructor
+     * @param {object} midiLeds - the MidiLeds class instance to manipulate.
+     * @param {object} midiColors - the MidiColors class instance to manipulate.
+     */
     function CCHelper(midiLeds, midiColors) {
         this._midiLeds = midiLeds;
         this._midiColors = midiColors;
         this._timeRange = 5000;
     }
 
-    // Prototype shortcut
+    // Shortcuts to improve speed and size
     var proto = CCHelper.prototype;
 
-    // Get the time range to use for scaling times
+    /**
+     * Gets the current time range to use for scaling times.
+     *
+     * @public
+     * @returns {number} - the current time range.
+     */
     proto.getTimeRange = function () {
         return this._timeRange;
     }
 
-    // Set the time range to use for scaling times
+    /**
+     * Sets the time range to use for scaling times.
+     *
+     * @public
+     * @param {number} timeRange - the time range to set.
+     */
     proto.setTimeRange = function (timeRange) {
         this._timeRange = timeRange;
     }
 
-    // Process a MIDI Control Change (CC) message
+    /**
+     * Processes a MIDI Control Change (CC) message.
+     *
+     * @param {number} _channel - the channel of the CC message.
+     * @param {number} _control - the control number of the CC message.
+     * @param {number} _value - the control value of the CC message.
+     */
     proto.controlChange = function (_channel, _control, _value) {
         var channel = _channel & 0xF;
         var control = _control & 0x7F;
